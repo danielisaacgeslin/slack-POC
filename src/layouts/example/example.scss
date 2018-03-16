@@ -1,0 +1,9 @@
+.list {
+  max-height: 200px;
+  overflow: auto;
+
+  &__item {
+    background: gray;
+    margin-bottom: 3px;
+  }
+}
