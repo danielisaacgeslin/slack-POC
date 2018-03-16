@@ -1,30 +1,48 @@
 import * as React from 'react';
 
+import HttpService from '../../services/Http.service';
 import './example.css';
 
-class Msg {
-  public type: 'message';
-  public ts: '1358878749.000002';
-  public user: 'U023BECGF';
-  public text: string;
+const token = '';
 
-  constructor(msg: string) {
+class Msg {
+  public type: string = 'message';
+  public ts: string = undefined;
+  public user: string = '...';
+  public channel: string = 'C9AD5LPJB';
+  public text: string = '';
+
+  constructor(msg: string, user?: string) {
     this.text = msg;
+    if (user) this.user = user;
   }
 }
 
 export default class Example extends React.Component {
   public state = {
     msgs: [] as Msg[],
-    inputText: ''
+    inputText: '',
+    connected: false
   };
   public list: HTMLElement;
   public itemHeight: number = 0;
+  public socket: WebSocket;
+
+  public async connect() {
+    const res: any = await HttpService.get('https://slack.com/api/rtm.connect', { params: { token } });
+    this.socket = new WebSocket(res.url);
+    // console.log()
+    this.socket.onopen = () => this.setState({ ...this.state, connected: true });
+    this.socket.onerror = error => console.error('error', error);
+    this.socket.onclose = () => this.setState({ ...this.state, connected: false });
+    this.socket.onmessage = msg => {
+      const data = JSON.parse(msg.data);
+      if (data.text) this.addMsg(new Msg(data.text, data.user));
+    };
+  }
 
   public componentWillMount() {
-    setInterval(() => {
-      this.addMsg(new Msg(Math.random().toString()));
-    }, 5000);
+    this.connect();
   }
 
   public addMsg(msg: Msg) {
@@ -35,7 +53,7 @@ export default class Example extends React.Component {
 
   public onSubmit(event: Event) {
     event.preventDefault();
-    this.addMsg(new Msg(this.state.inputText));
+    this.socket.send(JSON.stringify(new Msg(this.state.inputText)));
     setTimeout(() => this.onInputChange(''));
   }
 
@@ -53,6 +71,7 @@ export default class Example extends React.Component {
       <div>
         <form onSubmit={(event: any) => this.onSubmit(event)}>
           <input
+            disabled={!this.state.connected}
             value={this.state.inputText}
             onChange={(e) => this.onInputChange(e.target.value)}
             onKeyUp={(e: any) => this.onKeyUp(e.keyCode)}
@@ -64,7 +83,7 @@ export default class Example extends React.Component {
             key={i}
             ref={e => this.itemHeight = e ? e.offsetHeight : this.itemHeight}
           >
-            {msg.text}
+            {msg.user}: {msg.text}
           </p>)}
         </div>
       </div>

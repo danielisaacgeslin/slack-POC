@@ -5,7 +5,7 @@ import LazyRoute from 'react-lazy-route';
 import { store } from './state-mgmt/config';
 import Header from './layouts/header/Header';
 
-const Home = () => import('./layouts/home/HomeContainer');
+// const Home = () => import('./layouts/home/HomeContainer');
 const Example = () => import('./layouts/example/Example');
 
 class App extends React.Component {
@@ -16,8 +16,8 @@ class App extends React.Component {
           <div>
             <Header />
             <Switch>
-              <LazyRoute exact={true} path="/" render={Home} />
-              <LazyRoute exact={true} path="/example" render={Example} />
+              {/* <LazyRoute exact={true} path="/" render={Home} /> */}
+              <LazyRoute exact={true} path="/" render={Example} />
             </Switch>
           </div>
         </Router>

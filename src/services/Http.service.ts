@@ -1,6 +1,8 @@
-export interface Request extends RequestInit {
-  raw: boolean;
-  params: {
+export interface Request {
+  method?: string;
+  raw?: boolean;
+  body?: any;
+  params?: {
     [key: string]: any
   };
 }
@@ -40,7 +42,10 @@ export default class HttpService {
   private static parseParams(params: { [key: string]: any }): string {
     if (!params) return '';
     return '?' + Object.keys(params)
-      .map(key => `${key}=${JSON.stringify(params[key])}`)
+      .map(key => {
+        const type: string = typeof params[key];
+        return `${key}=${type === 'object' ? JSON.stringify(params[key]) : params[key]}`;
+      })
       .join('&');
   }
 }
